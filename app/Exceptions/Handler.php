@@ -48,6 +48,31 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        return parent::render($request, $exception);
+
+
+        /*edit for redirect problem solve between user and admin [multiauth] */
+        // Check out Error Handling #render for more information
+        // render method is responsible for converting a given exception into an HTTP response
+        // Catch AthenticationException and redirect back to somewhere else...
+        if($request->expectsJson()){
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $guard = array_get($exception->guards(),0);
+
+        switch ($guard){
+            case 'admin':
+                $login = 'admin.login';
+                break;
+
+            default:
+                $login = 'login';
+                break;
+        }
+
+        return redirect()->guest(route($login));
+        /*End of: edit for redirect problem solve between user and admin [multiauth] */
+
+       // return parent::render($request, $exception);  //default
     }
 }
